@@ -1,47 +1,76 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:svradio_flutterapp/app_widgets/channel_widget.dart';
+import 'package:svradio_flutterapp/classes/channel.dart';
+import './test_folder/dummy_data.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
   final dio = Dio();
-  final endpoint1 = "http://api.sr.se/api/v2/programs?format=json&indent=true&page=2";
-  final endpoint2 = 'https://api.sr.se/api/v2/scheduledepisodes?channelid=164&format=json';
-  final endpoint3 = 'http://api.sr.se/api/v2/channels/164';
+
+  //Map channels = {} ;
+  List<ChannelType> channels = [];
 
   void fetch() async {
-  Response response;
-  response = await dio.get(endpoint1);
-  print(response.data['programs']);
-  // The below request is the same as above.
-
-  // response = await dio.get(
-  //   '/test',
-  //   queryParameters: {'id': 12, 'name': 'dio'},
-  // );
-  // print(response.data.toString());
-}
+    Response response;
+    response = await dio.get(allChannelsURL1);
+    Map<String, dynamic> data = response.data;
+    //print(data['channels'][0]['name']);
+    for (var i = 0; i < data['channels'].length; i++) {
+      //channels.addAll(data['channels'][i]);
+      var item = ChannelType(
+        name: data['channels'][i]['name'],
+        id: data['channels'][i]['id'],
+        tagline: data['channels'][i]['tagline'],
+        color: data['channels'][i]['color'],
+        image: data['channels'][i]['image'],
+      );
+      setState(() {
+        channels.add(item);
+      });
+      //channels.add(item);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    fetch();
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('My first App'),
+          title: const Text('SverigesRadio'),
         ),
-        body: Column(
+        body: channels.isNotEmpty ? Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             const Text('Fetch info'),
+            ChannelWidget(item: channels[0]),
+            ChannelWidget(item: channels[1]),
+            // ListView.builder(
+            //   padding: const EdgeInsets.all(8),
+            //   itemCount: channels.length,
+            //   itemBuilder: (context, index) {
+            //     return ChannelWidget(item: channels[index]);
+            //   },
+            // ),
             ElevatedButton(
-              onPressed: fetch,
+              onPressed: (){},
               child: const Text('Fetch'),
             ),
           ],
-        ),
+        ) : const Center(child: Text('List not full'),),
       ),
     );
   }
