@@ -18,7 +18,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final dio = Dio();
 
-  //Map channels = {} ;
+  Map<String, dynamic> channelsMap = {} ;
   List<ChannelType> channels = [];
 
   void fetch() async {
@@ -35,8 +35,16 @@ class _MyAppState extends State<MyApp> {
         color: data['channels'][i]['color'],
         image: data['channels'][i]['image'],
       );
+      // Map<String, dynamic> item2 = {
+      //   'name': data['channels'][i]['name'],
+      //   'id': data['channels'][i]['id'],
+      //   'tagline': data['channels'][i]['tagline'],
+      //   'color': data['channels'][i]['color'],
+      //   'image': data['channels'][i]['image'],
+      // };
       setState(() {
         channels.add(item);
+        // channelsMap.addAll(item2);
       });
       //channels.add(item);
     }
@@ -44,7 +52,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    fetch();
+    //fetch();
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -52,25 +60,40 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('SverigesRadio'),
         ),
-        body: channels.isNotEmpty ? Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const Text('Fetch info'),
-            ChannelWidget(item: channels[0]),
-            ChannelWidget(item: channels[1]),
-            // ListView.builder(
-            //   padding: const EdgeInsets.all(8),
-            //   itemCount: channels.length,
-            //   itemBuilder: (context, index) {
-            //     return ChannelWidget(item: channels[index]);
-            //   },
-            // ),
-            ElevatedButton(
-              onPressed: (){},
-              child: const Text('Fetch'),
-            ),
-          ],
-        ) : const Center(child: Text('List not full'),),
+        body: channels.isNotEmpty
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  const Text('Channels:'),
+                  // ChannelWidget(item: channels[0]),
+                  // ChannelWidget(item: channels[1]),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(8),
+                      itemCount: channels.length,
+                      itemBuilder: (context, index) {
+                        return ChannelWidget(item: channels[index]);
+                      },
+                    ),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Center(
+                    child: Column(
+                      children: [
+                        const Text('List not full'),
+                        ElevatedButton(
+                          onPressed: fetch,
+                          child: const Text('Fetch'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }
