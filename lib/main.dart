@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:svradio_flutterapp/app_widgets/channel_widget.dart';
+import 'package:svradio_flutterapp/app_widgets/schedule_container.dart';
 import 'package:svradio_flutterapp/classes/channel.dart';
 import './test_folder/dummy_data.dart';
 
@@ -18,16 +19,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final dio = Dio();
 
-  Map<String, dynamic> channelsMap = {} ;
+  Map<String, dynamic> channelsMap = {};
   List<ChannelType> channels = [];
 
   void fetch() async {
     Response response;
     response = await dio.get(allChannelsURL1);
     Map<String, dynamic> data = response.data;
-    //print(data['channels'][0]['name']);
     for (var i = 0; i < data['channels'].length; i++) {
-      //channels.addAll(data['channels'][i]);
       var item = ChannelType(
         name: data['channels'][i]['name'],
         id: data['channels'][i]['id'],
@@ -35,24 +34,20 @@ class _MyAppState extends State<MyApp> {
         color: data['channels'][i]['color'],
         image: data['channels'][i]['image'],
       );
-      // Map<String, dynamic> item2 = {
-      //   'name': data['channels'][i]['name'],
-      //   'id': data['channels'][i]['id'],
-      //   'tagline': data['channels'][i]['tagline'],
-      //   'color': data['channels'][i]['color'],
-      //   'image': data['channels'][i]['image'],
-      // };
       setState(() {
         channels.add(item);
-        // channelsMap.addAll(item2);
       });
-      //channels.add(item);
     }
+  }
+
+  void goToStart() {
+    setState(() {
+      channels.clear();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    //fetch();
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -64,11 +59,20 @@ class _MyAppState extends State<MyApp> {
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Text('Channels:'),
-                  // ChannelWidget(item: channels[0]),
-                  // ChannelWidget(item: channels[1]),
-                  Expanded(
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      ElevatedButton(
+                        onPressed: goToStart,
+                        child: const Text('Back'),
+                      ),
+                      const Text('Channels:'),
+                    ],
+                  ),
+                  Container(
+                    height: 400,
                     child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
                       padding: const EdgeInsets.all(8),
                       itemCount: channels.length,
                       itemBuilder: (context, index) {
@@ -76,6 +80,7 @@ class _MyAppState extends State<MyApp> {
                       },
                     ),
                   ),
+                  ScheduleContainer(),
                 ],
               )
             : Column(
@@ -87,7 +92,7 @@ class _MyAppState extends State<MyApp> {
                         const Text('List not full'),
                         ElevatedButton(
                           onPressed: fetch,
-                          child: const Text('Fetch'),
+                          child: const Text('Enter'),
                         ),
                       ],
                     ),
